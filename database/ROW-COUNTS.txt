@@ -1,0 +1,7 @@
+users	18
+customers	18
+employees	9
+items	40
+sales invoices	63
+pos invoices	12
+companies	1

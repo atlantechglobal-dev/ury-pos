@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CampusBite — Staff Check-In</title>
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/ury/campusbite/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f6f8; --card:#ffffff; --ink:#171717; --sub:#6b7280; --line:#e5e7eb;
+    --brand:#007be0; --brand-dark:#005ca3;
+    --good:#1f9d55; --good-bg:#e7f7ee;
+    --warn:#a3711f; --warn-bg:#fff2df;
+    --shadow:0 1px 2px rgba(23,23,23,.04), 0 6px 20px -8px rgba(23,23,23,.10);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+  .shell{max-width:720px;margin:0 auto;padding:24px 18px 60px;}
+  header{text-align:center;margin-bottom:22px;}
+  header h1{font-size:19px;font-weight:800;margin:0 0 4px;}
+  header p{font-size:12.5px;color:var(--sub);margin:0;}
+
+  .staff-list{display:flex;flex-direction:column;gap:10px;}
+  .staff-card{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:14px 16px;
+    display:flex;align-items:center;gap:12px;}
+  .av{width:42px;height:42px;border-radius:50%;background:var(--brand);color:#fff;font-weight:800;
+    font-size:14px;display:flex;align-items:center;justify-content:center;flex:0 0 auto;}
+  .info{flex:1;min-width:0;}
+  .info .nm{font-weight:700;font-size:14.5px;}
+  .info .rl{font-size:11.5px;color:var(--sub);}
+  .status-pill{font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;text-transform:uppercase;
+    letter-spacing:.03em;margin-top:3px;display:inline-block;}
+  .status-pill.in{background:var(--good-bg);color:var(--good);}
+  .status-pill.out{background:var(--warn-bg);color:var(--warn);}
+  .actions{display:flex;gap:8px;flex:0 0 auto;}
+  .btn{border:none;border-radius:10px;padding:10px 14px;font-size:12.5px;font-weight:700;cursor:pointer;transition:.15s;}
+  .btn.checkin{background:var(--good);color:#fff;}
+  .btn.checkout{background:var(--warn);color:#fff;}
+  .btn:disabled{opacity:.35;cursor:default;}
+  .btn:not(:disabled):active{transform:scale(.96);}
+
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;
+    opacity:0;transition:.25s;pointer-events:none;box-shadow:var(--shadow);}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  .empty{text-align:center;color:var(--sub);font-size:13px;padding:40px 0;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <h1>Staff Check-In</h1>
+    <p>Tap Check In at the start of a shift, Check Out at the end</p>
+  </header>
+  <div class="staff-list" id="list"><div class="empty">Loading staff…</div></div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+
+  function $(sel){ return document.querySelector(sel); }
+  function initials(name){
+    return (name||"?").trim().split(/\s+/).map(function(w){return w[0];}).slice(0,2).join("").toUpperCase();
+  }
+  function showToast(msg){
+    var t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    setTimeout(function(){ t.classList.remove("show"); }, 2200);
+  }
+
+  function render(staff){
+    if(!staff.length){
+      $("#list").innerHTML = '<div class="empty">No active staff on record.</div>';
+      return;
+    }
+    $("#list").innerHTML = staff.map(function(s){
+      var pill = s.currently_in
+        ? '<span class="status-pill in">Checked In</span>'
+        : '<span class="status-pill out">Checked Out</span>';
+      return '<div class="staff-card" data-emp="'+s.employee+'">' +
+        '<div class="av">'+initials(s.name)+'</div>' +
+        '<div class="info"><div class="nm">'+s.name+'</div>' +
+        '<div class="rl">'+(s.role||"Staff")+(s.hotel ? " · "+s.hotel : "")+'</div>' + pill + '</div>' +
+        '<div class="actions">' +
+          '<button class="btn checkin" '+(s.currently_in?"disabled":"")+'>Check In</button>' +
+          '<button class="btn checkout" '+(!s.currently_in?"disabled":"")+'>Check Out</button>' +
+        '</div></div>';
+    }).join("");
+  }
+
+  function load(){
+    fetch("/api/method/ury.ury.api.campusbite.get_staff_kiosk_list", { credentials: "omit" })
+      .then(function(r){ return r.json(); })
+      .then(function(d){ render(d.message || []); });
+  }
+
+  document.addEventListener("click", function(e){
+    var btn = e.target.closest(".btn");
+    if(!btn) return;
+    var card = e.target.closest(".staff-card");
+    var employee = card.getAttribute("data-emp");
+    var name = card.querySelector(".nm").textContent;
+    var logType = btn.classList.contains("checkin") ? "IN" : "OUT";
+
+    btn.disabled = true;
+    fetch("/api/method/ury.ury.api.campusbite.employee_checkin", {
+      method: "POST", credentials: "omit",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({employee: employee, log_type: logType})
+    }).then(function(r){ return r.json(); }).then(function(){
+      showToast(name + " — " + (logType === "IN" ? "checked in" : "checked out"));
+      load();
+    });
+  });
+
+  load();
+})();
+</script>
+</body>
+</html>

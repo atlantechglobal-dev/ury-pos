@@ -1,0 +1,8 @@
+Ubuntu 22.04.5 LTS
+5.15.0-190-generic
+node v18.20.8
+mysql  Ver 15.1 Distrib 10.6.23-MariaDB, for debian-linux-gnu (x86_64) using  EditLine wrapper
+Python 3.10.12
+nginx version: nginx/1.18.0 (Ubuntu)
+Redis server v=6.0.16 sha=00000000:0 malloc=jemalloc-5.2.1 bits=64 build=d6ed09173b889769
+5.31.0

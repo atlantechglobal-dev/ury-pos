@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CampusBite — Order Number OCR (Proof of Concept)</title>
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/ury/campusbite/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f6f8; --card:#ffffff; --ink:#171717; --sub:#6b7280; --line:#e5e7eb;
+    --brand:#007be0; --brand-dark:#005ca3;
+    --good:#1f9d55; --good-bg:#e7f7ee;
+    --shadow:0 1px 2px rgba(23,23,23,.04), 0 6px 20px -8px rgba(23,23,23,.10);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+  .shell{max-width:520px;margin:0 auto;padding:28px 18px 60px;}
+  header{margin-bottom:18px;}
+  header .tag{font-size:11px;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.04em;}
+  header h1{font-size:20px;font-weight:800;margin:6px 0 6px;}
+  header p{font-size:13px;color:var(--sub);margin:0;line-height:1.5;}
+
+  .panel{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:20px;margin-top:16px;}
+  .drop{border:2px dashed var(--line);border-radius:12px;padding:30px 16px;text-align:center;cursor:pointer;}
+  .drop:hover{border-color:var(--brand);}
+  .drop .hint{font-size:12.5px;color:var(--sub);margin-top:6px;}
+  input[type=file]{display:none;}
+  img#preview{max-width:100%;border-radius:10px;margin-top:14px;display:none;}
+
+  .result{margin-top:16px;display:none;}
+  .result .label{font-size:11px;font-weight:800;color:var(--sub);text-transform:uppercase;letter-spacing:.03em;}
+  .result .big{font-size:34px;font-weight:800;color:var(--good);margin:6px 0;font-variant-numeric:tabular-nums;}
+  .result .raw{font-size:12px;color:var(--sub);background:var(--bg);padding:8px 10px;border-radius:8px;margin-top:8px;}
+
+  .btn{width:100%;margin-top:14px;background:var(--brand);color:#fff;border:none;border-radius:10px;
+    padding:12px;font-size:14px;font-weight:700;cursor:pointer;}
+  .btn:disabled{opacity:.5;}
+  .spin{display:none;text-align:center;color:var(--sub);font-size:13px;margin-top:12px;}
+</style>
+</head>
+<body>
+<div class="shell">
+  <header>
+    <div class="tag">Proof of Concept</div>
+    <h1>Order Number OCR</h1>
+    <p>Reads a printed order number straight from a photo. Every order in CampusBite already reaches the kitchen digitally — this exists to show the capability if a physical-token intake channel is confirmed later.</p>
+  </header>
+
+  <div class="panel">
+    <label class="drop" for="fileInput">
+      <div>📷 Tap to photograph or upload an order number</div>
+      <div class="hint">Works best with clear, high-contrast printed digits</div>
+    </label>
+    <input type="file" id="fileInput" accept="image/*" capture="environment">
+    <img id="preview">
+    <button class="btn" id="readBtn" disabled>Read Order Number</button>
+    <div class="spin" id="spin">Reading…</div>
+    <div class="result" id="result">
+      <div class="label">Detected Order Number</div>
+      <div class="big" id="orderNum">—</div>
+      <div class="raw" id="rawText"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var fileData = null;
+
+  function $(sel){ return document.querySelector(sel); }
+
+  $("#fileInput").addEventListener("change", function(e){
+    var file = e.target.files[0];
+    if(!file) return;
+    var reader = new FileReader();
+    reader.onload = function(ev){
+      fileData = ev.target.result;
+      $("#preview").src = fileData;
+      $("#preview").style.display = "block";
+      $("#readBtn").disabled = false;
+      $("#result").style.display = "none";
+    };
+    reader.readAsDataURL(file);
+  });
+
+  $("#readBtn").addEventListener("click", function(){
+    if(!fileData) return;
+    $("#readBtn").disabled = true;
+    $("#spin").style.display = "block";
+    fetch("/api/method/ury.ury.api.campusbite.ocr_read_order_number", {
+      method: "POST", credentials: "omit",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({image_base64: fileData})
+    }).then(function(r){ return r.json(); }).then(function(d){
+      $("#spin").style.display = "none";
+      $("#readBtn").disabled = false;
+      var msg = d.message || {};
+      $("#orderNum").textContent = msg.order_number || "Not detected";
+      $("#rawText").textContent = "Raw OCR text: " + (msg.raw_text || "(empty)");
+      $("#result").style.display = "block";
+    }).catch(function(){
+      $("#spin").style.display = "none";
+      $("#readBtn").disabled = false;
+      $("#orderNum").textContent = "Error reading image";
+      $("#result").style.display = "block";
+    });
+  });
+})();
+</script>
+</body>
+</html>

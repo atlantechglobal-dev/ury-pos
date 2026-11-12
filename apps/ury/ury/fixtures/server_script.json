@@ -1,0 +1,21 @@
+[
+ {
+  "allow_guest": 0,
+  "api_method": null,
+  "cron_format": null,
+  "disabled": 0,
+  "docstatus": 0,
+  "doctype": "Server Script",
+  "doctype_event": "Before Save",
+  "enable_rate_limit": 0,
+  "event_frequency": "All",
+  "modified": "2026-07-07 12:07:01.415003",
+  "module": null,
+  "name": "POS Invoice Cashier Discount Limit",
+  "rate_limit_count": 5,
+  "rate_limit_seconds": 86400,
+  "reference_doctype": "POS Invoice",
+  "script": "\nmanager_roles = {\"System Manager\", \"URY Manager\"}\ncashier_max_discount = 10\n\nuser_roles = set(frappe.get_all(\n    \"Has Role\",\n    filters={\"parent\": frappe.session.user, \"parenttype\": \"User\"},\n    pluck=\"role\",\n))\nis_manager = frappe.session.user == \"Administrator\" or bool(manager_roles & user_roles)\nis_cashier_only = not is_manager and \"URY Cashier\" in user_roles\n\nif is_cashier_only and doc.get(\"additional_discount_percentage\"):\n    requested = float(doc.additional_discount_percentage or 0)\n\n    if requested > cashier_max_discount:\n        frappe.throw(\n            f\"Cashier can only apply up to {cashier_max_discount}% discount. Ask a Manager for more.\"\n        )\n\n    if doc.get(\"invoice_printed\") and not doc.is_new():\n        previous_discount = frappe.db.get_value(\n            \"POS Invoice\", doc.name, \"additional_discount_percentage\"\n        )\n        if float(previous_discount or 0) != requested:\n            frappe.throw(\n                \"Discount cannot be changed after the bill has been printed. Ask a Manager to adjust it.\"\n            )\n",
+  "script_type": "DocType Event"
+ }
+]

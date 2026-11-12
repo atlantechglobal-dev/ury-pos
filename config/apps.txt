@@ -1,0 +1,4 @@
+frappe
+hrms
+ury
+erpnext

@@ -1,0 +1,17 @@
+{
+  "name": "CampusBite",
+  "short_name": "CampusBite",
+  "description": "Corporate Cafeteria, reimagined — order from any counter, no queue.",
+  "id": "/campusbite",
+  "start_url": "/campusbite",
+  "scope": "/campusbite",
+  "display": "standalone",
+  "background_color": "#f8f8f8",
+  "theme_color": "#007be0",
+  "orientation": "portrait",
+  "icons": [
+    { "src": "/assets/ury/campusbite/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/ury/campusbite/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/ury/campusbite/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

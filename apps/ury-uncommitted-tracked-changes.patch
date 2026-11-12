@@ -1,0 +1,16 @@
+diff --git a/ury/hooks.py b/ury/hooks.py
+index 18b3fab..f297fc7 100644
+--- a/ury/hooks.py
++++ b/ury/hooks.py
+@@ -162,7 +162,10 @@ scheduler_events = {
+ 		"* * * * *":[
+ 			"ury.ury.api.ury_kot_validation.kotValidationThread"
+ 		]
+-	}
++	},
++    "daily": [
++        "ury.ury.api.campusbite_setup.check_expiring_batches"
++    ]
+ # 	"all": [
+ # 		"ury.tasks.all"
+ # 	],

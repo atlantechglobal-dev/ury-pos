@@ -1,0 +1,57 @@
+{
+ "actions": [],
+ "creation": "2026-07-08 00:00:00.000000",
+ "doctype": "DocType",
+ "editable_grid": 1,
+ "engine": "InnoDB",
+ "field_order": [
+  "logo",
+  "app_name"
+ ],
+ "fields": [
+  {
+   "fieldname": "logo",
+   "fieldtype": "Attach Image",
+   "label": "POS Logo",
+   "description": "Shown in the header and loading screen of both POS apps. Leave blank to use the default URY logo."
+  },
+  {
+   "fieldname": "app_name",
+   "fieldtype": "Data",
+   "label": "App Name",
+   "description": "Shown in the loading screen text (e.g. \"Loading <App Name>...\"). Leave blank to use the default \"URY POS\"."
+  }
+ ],
+ "index_web_pages_for_search": 1,
+ "issingle": 1,
+ "links": [],
+ "modified": "2026-07-08 00:00:00.000000",
+ "modified_by": "Administrator",
+ "module": "URY",
+ "name": "URY Settings",
+ "owner": "Administrator",
+ "permissions": [
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "System Manager",
+   "share": 1,
+   "write": 1
+  },
+  {
+   "create": 1,
+   "email": 1,
+   "print": 1,
+   "read": 1,
+   "role": "URY Manager",
+   "share": 1,
+   "write": 1
+  }
+ ],
+ "sort_field": "modified",
+ "sort_order": "DESC",
+ "states": [],
+ "track_changes": 1
+}

@@ -1,0 +1,2 @@
+
+0 */6 * * * cd /home/frappe/frappe-bench && /usr/local/bin/bench --verbose --site all backup >> /home/frappe/frappe-bench/logs/backup.log 2>&1 # bench auto backups set for every 6 hours

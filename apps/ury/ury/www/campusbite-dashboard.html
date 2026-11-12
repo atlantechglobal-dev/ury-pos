@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CampusBite — Operations Dashboard</title>
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/ury/campusbite/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f6f8; --card:#ffffff; --ink:#171717; --sub:#6b7280; --line:#e5e7eb;
+    --brand:#007be0; --brand-dark:#005ca3; --brand-bg:#edf6fd;
+    --good:#1f9d55; --good-bg:#e7f7ee;
+    --warn:#a3711f; --warn-bg:#fff2df;
+    --info:#0070cc; --info-bg:#edf6fd;
+    --shadow:0 1px 2px rgba(23,23,23,.04), 0 6px 20px -8px rgba(23,23,23,.10);
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;}
+  .shell{max-width:1180px;margin:0 auto;padding:22px 20px 60px;}
+
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;}
+  .brand{display:flex;align-items:center;gap:10px;}
+  .brand .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(160deg,var(--brand),#3fa3fa);
+    display:flex;align-items:center;justify-content:center;}
+  .brand .mark svg{width:19px;height:19px;}
+  .brand h1{font-size:17px;font-weight:800;margin:0;letter-spacing:-.2px;}
+  .brand .sub{font-size:11.5px;color:var(--sub);}
+  .live-dot{display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--good);font-weight:700;}
+  .live-dot span{width:7px;height:7px;border-radius:50%;background:var(--good);animation:pulse 1.6s ease-in-out infinite;}
+  @keyframes pulse{0%,100%{opacity:1;}50%{opacity:.35;}}
+
+  .tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px;margin-bottom:20px;}
+  .tab-btn{flex:0 0 auto;padding:9px 16px;border-radius:20px;border:1px solid var(--line);background:var(--card);
+    color:var(--sub);font-weight:600;font-size:13px;cursor:pointer;white-space:nowrap;transition:.15s;}
+  .tab-btn:hover{border-color:var(--brand);color:var(--brand);}
+  .tab-btn.active{background:var(--brand);border-color:var(--brand);color:#fff;}
+
+  .stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px;}
+  @media (max-width:760px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+  .stat-card{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:16px 18px;}
+  .stat-card .lbl{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--sub);font-weight:700;margin-bottom:6px;}
+  .stat-card .val{font-size:24px;font-weight:800;letter-spacing:-.3px;}
+  .stat-card .val small{font-size:13px;font-weight:600;color:var(--sub);}
+
+  .grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:16px;align-items:start;}
+  @media (max-width:900px){.grid2{grid-template-columns:1fr;}}
+
+  .panel{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:18px;margin-bottom:16px;}
+  .panel h2{font-size:14.5px;margin:0 0 14px;font-weight:800;display:flex;align-items:center;justify-content:space-between;}
+  .panel h2 .count{font-size:11px;font-weight:700;color:var(--sub);background:var(--bg);padding:3px 9px;border-radius:20px;}
+
+  .order-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);}
+  .order-row:last-child{border-bottom:none;}
+  .order-row .oi{min-width:0;}
+  .order-row .oinv{font-weight:700;font-size:12.5px;}
+  .order-row .oitems{font-size:11.5px;color:var(--sub);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:280px;}
+  .order-row .oright{text-align:right;flex:0 0 auto;}
+  .order-row .oamt{font-weight:800;font-size:13px;}
+  .order-row .ometa{font-size:10.5px;color:var(--sub);}
+
+  .stage-pill{display:inline-block;font-size:9.5px;font-weight:800;padding:2px 8px;border-radius:20px;
+    text-transform:uppercase;letter-spacing:.02em;margin-top:3px;}
+  .stage-pill.confirmed{background:var(--info-bg);color:var(--info);}
+  .stage-pill.preparing{background:var(--warn-bg);color:var(--warn);}
+  .stage-pill.served{background:var(--good-bg);color:var(--good);}
+
+  .fb-row{padding:11px 0;border-bottom:1px solid var(--line);}
+  .fb-row:last-child{border-bottom:none;}
+  .fb-top{display:flex;justify-content:space-between;align-items:baseline;}
+  .fb-stars{color:#ffb03b;font-size:13px;letter-spacing:1px;}
+  .fb-vendor{font-size:10.5px;color:var(--sub);font-weight:700;}
+  .fb-comment{font-size:12.5px;color:var(--ink);margin-top:4px;}
+  .fb-when{font-size:10px;color:var(--sub);margin-top:3px;}
+
+  .stock-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line);gap:10px;}
+  .stock-row:last-child{border-bottom:none;}
+  .stock-row .sname{font-size:12.5px;font-weight:600;}
+  .stock-row .svendor{font-size:10.5px;color:var(--sub);}
+  .stock-row .sqty{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .stock-row .sqty.low{color:var(--warn);}
+
+  .staff-wrap{display:flex;flex-wrap:wrap;gap:8px;}
+  .staff-chip{display:flex;align-items:center;gap:8px;background:var(--bg);border-radius:20px;padding:6px 12px 6px 6px;}
+  .staff-chip .av{width:24px;height:24px;border-radius:50%;background:var(--brand);color:#fff;font-size:10.5px;font-weight:800;
+    display:flex;align-items:center;justify-content:center;}
+  .staff-chip .nm{font-size:12px;font-weight:700;}
+  .staff-chip .rl{font-size:10px;color:var(--sub);}
+
+  .peak-bars{display:flex;align-items:flex-end;gap:10px;height:90px;padding-top:10px;}
+  .peak-bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;justify-content:flex-end;height:100%;}
+  .peak-bar .bar{width:100%;max-width:44px;background:linear-gradient(180deg,var(--brand),var(--brand-dark));border-radius:8px 8px 3px 3px;}
+  .peak-bar .lbl{font-size:10.5px;color:var(--sub);font-weight:700;}
+
+  .empty{color:var(--sub);font-size:12.5px;text-align:center;padding:24px 0;}
+  .skeleton{opacity:.4;}
+</style>
+</head>
+<body>
+<div class="shell">
+
+  <header>
+    <div class="brand">
+      <div class="mark"><svg viewBox="0 0 44 44" fill="none"><path d="M11 6v13M15 6v13M19 6v13" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M15 19v19" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/><path d="M30 6c-3 0-5 3-5 7s2 6 5 8v17" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round"/></svg></div>
+      <div>
+        <h1>CampusBite — Operations Dashboard</h1>
+        <div class="sub">Owner &amp; Aggregator view — live data</div>
+      </div>
+    </div>
+    <div class="live-dot"><span></span> Live · auto-refreshing</div>
+  </header>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div class="stat-grid" id="statGrid"></div>
+
+  <div class="grid2">
+    <div>
+      <div class="panel">
+        <h2>Recent Orders <span class="count" id="ordersCount">—</span></h2>
+        <div id="ordersList"></div>
+      </div>
+      <div class="panel">
+        <h2>Peak Hours</h2>
+        <div class="peak-bars" id="peakBars"></div>
+      </div>
+    </div>
+    <div>
+      <div class="panel">
+        <h2>Recent Feedback <span class="count" id="fbCount">—</span></h2>
+        <div id="fbList"></div>
+      </div>
+      <div class="panel">
+        <h2>Staff on Duty</h2>
+        <div class="staff-wrap" id="staffList"></div>
+      </div>
+      <div class="panel">
+        <h2>Live Stock <span class="count" id="stockCount">—</span></h2>
+        <div id="stockList"></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var VENDORS = [
+    {key:"ALL", label:"All Hotels"},
+    {key:"SSK", label:"South Spice Kitchen"},
+    {key:"PT", label:"Punjab Tadka"},
+    {key:"WR", label:"Wok & Roll"},
+    {key:"BT", label:"Bean There Cafe"},
+  ];
+  var activeVendor = "ALL";
+  var refreshTimer = null;
+
+  function $(sel){ return document.querySelector(sel); }
+  function rupee(n){ return "₹" + Math.round(n || 0).toLocaleString("en-IN"); }
+  function initials(name){
+    return (name || "?").trim().split(/\s+/).map(function(w){return w[0];}).slice(0,2).join("").toUpperCase();
+  }
+
+  function renderTabs(){
+    var wrap = $("#tabs");
+    wrap.innerHTML = "";
+    VENDORS.forEach(function(v){
+      var b = document.createElement("button");
+      b.className = "tab-btn" + (v.key === activeVendor ? " active" : "");
+      b.textContent = v.label;
+      b.addEventListener("click", function(){
+        activeVendor = v.key;
+        renderTabs();
+        load();
+      });
+      wrap.appendChild(b);
+    });
+  }
+
+  function renderStats(d){
+    $("#statGrid").innerHTML =
+      '<div class="stat-card"><div class="lbl">Total Sales</div><div class="val">'+rupee(d.total_sales)+'</div></div>' +
+      '<div class="stat-card"><div class="lbl">Orders</div><div class="val">'+d.order_count+'</div></div>' +
+      '<div class="stat-card"><div class="lbl">Avg Rating</div><div class="val">'+(d.avg_rating ? d.avg_rating+' <small>/ 5</small>' : '—')+'</div></div>' +
+      '<div class="stat-card"><div class="lbl">Feedback Received</div><div class="val">'+d.feedback_count+'</div></div>';
+  }
+
+  function renderOrders(d){
+    $("#ordersCount").textContent = d.recent_orders.length;
+    if(!d.recent_orders.length){
+      $("#ordersList").innerHTML = '<div class="empty">No orders yet.</div>';
+      return;
+    }
+    $("#ordersList").innerHTML = d.recent_orders.map(function(o){
+      return '<div class="order-row"><div class="oi">' +
+        '<div class="oinv">'+o.invoice+(activeVendor==="ALL" ? ' <span style="color:var(--sub);font-weight:600;">· '+o.vendor+'</span>' : '')+'</div>' +
+        '<div class="oitems">'+(o.items || "—")+'</div></div>' +
+        '<div class="oright"><div class="oamt">'+rupee(o.grand_total)+'</div>' +
+        '<div class="ometa">'+o.posting_date+' '+o.posting_time+'</div>' +
+        '<span class="stage-pill '+o.stage.toLowerCase()+'">'+o.stage+'</span></div></div>';
+    }).join("");
+  }
+
+  function renderFeedback(d){
+    $("#fbCount").textContent = d.recent_feedback.length;
+    if(!d.recent_feedback.length){
+      $("#fbList").innerHTML = '<div class="empty">No feedback yet.</div>';
+      return;
+    }
+    $("#fbList").innerHTML = d.recent_feedback.map(function(f){
+      var stars = "★★★★★".slice(0,f.rating) + "☆☆☆☆☆".slice(0,5-f.rating);
+      return '<div class="fb-row"><div class="fb-top"><span class="fb-stars">'+stars+'</span>' +
+        (activeVendor==="ALL" ? '<span class="fb-vendor">'+f.vendor+'</span>' : '') + '</div>' +
+        (f.comment ? '<div class="fb-comment">"'+f.comment+'"</div>' : '') +
+        '<div class="fb-when">'+f.when+'</div></div>';
+    }).join("");
+  }
+
+  function renderStaff(d){
+    if(!d.staff.length){
+      $("#staffList").innerHTML = '<div class="empty">No staff on record.</div>';
+      return;
+    }
+    $("#staffList").innerHTML = d.staff.map(function(s){
+      return '<div class="staff-chip"><div class="av">'+initials(s.name)+'</div>' +
+        '<div><div class="nm">'+s.name+'</div><div class="rl">'+(s.role||"Staff")+'</div></div></div>';
+    }).join("");
+  }
+
+  function renderStock(d){
+    var levels = d.stock_levels || [];
+    $("#stockCount").textContent = levels.length;
+    if(!levels.length){
+      $("#stockList").innerHTML = '<div class="empty">No stock data yet.</div>';
+      return;
+    }
+    $("#stockList").innerHTML = levels.slice(0, 10).map(function(s){
+      var low = s.qty <= 20;
+      return '<div class="stock-row"><div><div class="sname">'+s.item_code+'</div>' +
+        (activeVendor==="ALL" ? '<div class="svendor">'+s.vendor+'</div>' : '') + '</div>' +
+        '<div class="sqty'+(low?' low':'')+'">'+Math.round(s.qty)+'</div></div>';
+    }).join("");
+  }
+
+  function renderPeak(d){
+    var wrap = $("#peakBars");
+    if(!d.peak_hours.length){
+      wrap.innerHTML = '<div class="empty">Not enough data yet.</div>';
+      return;
+    }
+    var max = Math.max.apply(null, d.peak_hours.map(function(p){return p.orders;}));
+    wrap.innerHTML = d.peak_hours.map(function(p){
+      var h = Math.max(18, Math.round((p.orders / max) * 76));
+      var label = (p.hour % 12 || 12) + (p.hour < 12 ? " AM" : " PM");
+      return '<div class="peak-bar"><div class="bar" style="height:'+h+'px;"></div>' +
+        '<div class="lbl">'+label+'</div><div class="lbl">'+p.orders+' orders</div></div>';
+    }).join("");
+  }
+
+  function load(){
+    fetch("/api/method/ury.ury.api.campusbite.get_hotel_dashboard?vendor=" + encodeURIComponent(activeVendor))
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var data = d.message;
+        renderStats(data);
+        renderOrders(data);
+        renderFeedback(data);
+        renderStaff(data);
+        renderStock(data);
+        renderPeak(data);
+      });
+  }
+
+  renderTabs();
+  load();
+  refreshTimer = setInterval(load, 15000);
+})();
+</script>
+</body>
+</html>

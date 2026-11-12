@@ -1,0 +1,4 @@
+frappe | https://github.com/frappe/frappe.git | branch version-15 | commit 588e443808206a7bfe87429c5a55e16016ec7840 | chore(release): Bumped to Version 15.113.4
+erpnext | https://github.com/frappe/erpnext.git | branch version-15 | commit b5f784612d5b7969b72848dda5b22f10d3a8f764 | chore(release): Bumped to Version 15.115.0
+hrms | https://github.com/frappe/hrms.git | branch version-15 | commit b2d9a3cc753890788ecfef63d972616db505e203 | chore(release): Bumped to Version 15.63.4
+ury | https://github.com/atlantechglobal-dev/rpos.git | branch main | commit d33c60fdb0c71988827c3f09cad750db12497ead | Arabian Mandi / URY POS deployment snapshot

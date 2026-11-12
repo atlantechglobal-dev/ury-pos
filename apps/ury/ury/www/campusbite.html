@@ -1,0 +1,1264 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no" />
+<title>CampusBite</title>
+<link rel="manifest" href="/campusbite-manifest.json">
+<meta name="theme-color" content="#007be0">
+<link rel="icon" type="image/png" sizes="192x192" href="/assets/ury/campusbite/icon-192.png">
+<link rel="apple-touch-icon" href="/assets/ury/campusbite/icon-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f8f8f8; --card:#ffffff; --ink:#171717; --sub:#7c7c7c; --line:#ededed;
+    --brand:#007be0; --brand-dark:#005ca3; --brand-ink:#ffffff;
+    --info:#007be0; --info-bg:#edf6fd; --info-text:#0070cc;
+    --good:#278f5e; --shadow:0 6px 20px rgba(20,20,30,.08);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:"InterVariable","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen,Ubuntu,Cantarell,"Fira Sans","Droid Sans","Helvetica Neue",sans-serif;}
+  #app{max-width:480px;margin:0 auto;min-height:100vh;background:var(--bg);
+    display:flex;flex-direction:column;position:relative;}
+  .screen{display:none;flex-direction:column;flex:1;animation:fade .25s ease;}
+  .screen.active{display:flex;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  /* ---------- Splash ---------- */
+  #splash{align-items:center;justify-content:center;background:linear-gradient(160deg,#0070cc,#0289f7 60%,#3fa3fa);
+    color:#fff;text-align:center;gap:14px;min-height:100vh;}
+  #splash .splash-logo{width:84px;height:84px;border-radius:22px;background:rgba(255,255,255,.18);
+    display:flex;align-items:center;justify-content:center;animation:pulse 1.4s ease-in-out infinite;}
+  #splash .splash-logo svg{width:46px;height:46px;}
+  #splash h1{margin:14px 0 2px;font-size:24px;font-weight:800;letter-spacing:-.4px;}
+  #splash p{margin:0;font-size:12.5px;opacity:.85;}
+  #splash .dots{display:flex;gap:6px;margin-top:20px;}
+  #splash .dots span{width:7px;height:7px;border-radius:50%;background:#fff;opacity:.4;animation:dotpulse 1.2s ease-in-out infinite;}
+  #splash .dots span:nth-child(2){animation-delay:.15s;}
+  #splash .dots span:nth-child(3){animation-delay:.3s;}
+  @keyframes pulse{0%,100%{transform:scale(1);}50%{transform:scale(1.08);}}
+  @keyframes dotpulse{0%,100%{opacity:.35;}50%{opacity:1;}}
+
+  .topbar{position:sticky;top:0;z-index:5;background:var(--brand);color:var(--brand-ink);
+    padding:16px 18px;display:flex;align-items:center;gap:10px;}
+  .topbar.transparent{position:absolute;top:0;left:0;right:0;background:linear-gradient(180deg,rgba(0,0,0,.45),rgba(0,0,0,0));
+    box-shadow:none;z-index:6;}
+  .topbar .back{font-size:20px;cursor:pointer;padding:2px 8px;margin:-2px 0 -2px -8px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;width:32px;height:32px;background:rgba(255,255,255,.18);}
+  .topbar .back:active{background:rgba(255,255,255,.32);}
+  .topbar h1{font-size:17px;margin:0;font-weight:700;flex:1;}
+  .topbar .sub{font-size:12px;opacity:.85;}
+
+  .brandhero{padding:38px 24px 26px;text-align:center;background:linear-gradient(160deg,#0070cc,#0289f7 60%,#3fa3fa);color:#fff;}
+  .brandhero .logo{font-size:44px;line-height:1;margin-bottom:6px;}
+  .brandhero h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-0.5px;}
+  .brandhero p{margin:6px 0 0;font-size:13.5px;opacity:.92;}
+
+  .content{padding:18px;flex:1;display:flex;flex-direction:column;gap:14px;}
+
+  label.field{display:block;font-size:12.5px;font-weight:600;color:var(--sub);margin-bottom:6px;margin-top:2px;}
+  input.text, textarea.text{width:100%;padding:13px 14px;border-radius:12px;border:1.5px solid var(--line);
+    font-size:15px;background:var(--card);outline:none;font-family:inherit;}
+  input.text:focus, textarea.text:focus{border-color:var(--brand);}
+
+  .btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;padding:14px 16px;
+    border-radius:14px;border:none;font-size:15.5px;font-weight:700;cursor:pointer;
+    background:var(--brand);color:#fff;box-shadow:0 8px 18px rgba(0,123,224,.32);}
+  .btn:active{transform:scale(.98);}
+  .btn.secondary{background:var(--card);color:var(--ink);box-shadow:none;border:1.5px solid var(--line);}
+  .btn:disabled{opacity:.5;box-shadow:none;}
+  .btn.small{padding:8px 12px;font-size:13px;border-radius:10px;width:auto;box-shadow:none;}
+
+  .card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);padding:16px;}
+
+  /* ---------- OTP ---------- */
+  .otp-row{display:flex;gap:10px;justify-content:center;margin:10px 0 4px;}
+  .otp-box{width:52px;height:60px;border-radius:12px;border:1.5px solid var(--line);background:var(--card);
+    font-size:24px;font-weight:800;text-align:center;outline:none;}
+  .otp-box:focus{border-color:var(--brand);}
+
+  /* ---------- Shell header + tabbar ---------- */
+  .shell-header{position:sticky;top:0;z-index:5;background:var(--card);border-bottom:1px solid var(--line);
+    padding:14px 18px;display:flex;align-items:center;gap:10px;}
+  .shell-header .app-name{font-weight:800;font-size:16.5px;flex:1;}
+  .icon-btn{width:36px;height:36px;border-radius:50%;background:#f2f3f5;display:flex;align-items:center;
+    justify-content:center;cursor:pointer;position:relative;flex:0 0 auto;}
+  .icon-btn svg{width:18px;height:18px;}
+  .avatar-btn{width:36px;height:36px;border-radius:50%;background:var(--info-bg);color:var(--info-text);font-weight:800;
+    font-size:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;flex:0 0 auto;}
+
+  .tabbar{position:sticky;bottom:0;z-index:5;background:var(--card);border-top:1px solid var(--line);
+    display:flex;padding:6px 4px calc(6px + env(safe-area-inset-bottom));}
+  .tab-btn{flex:1;background:none;border:none;display:flex;flex-direction:column;align-items:center;gap:3px;
+    padding:6px 2px;cursor:pointer;color:#9aa0ab;position:relative;}
+  .tab-btn svg{width:21px;height:21px;}
+  .tab-btn .tlabel{font-size:10px;font-weight:700;}
+  .tab-btn.active{color:var(--brand);}
+  .tab-badge{position:absolute;top:2px;right:calc(50% - 18px);min-width:15px;height:15px;border-radius:8px;
+    background:var(--brand);color:#fff;font-size:9px;font-weight:800;display:flex;align-items:center;
+    justify-content:center;padding:0 3px;}
+
+  .shell-body{flex:1;overflow-y:auto;display:flex;flex-direction:column;}
+  .shell-page{display:none;flex-direction:column;flex:1;}
+  .shell-page.active{display:flex;}
+
+  .vendor-card{display:flex;align-items:center;gap:14px;background:var(--card);border-radius:16px;
+    box-shadow:var(--shadow);padding:12px;cursor:pointer;border:1.5px solid transparent;overflow:hidden;}
+  .vendor-card:active{border-color:var(--brand);}
+  .vendor-card.selected{border-color:var(--brand);background:#f8f8f8;}
+  .vendor-thumb{width:64px;height:64px;flex:0 0 64px;border-radius:14px;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;background-size:cover;background-position:center;}
+  .vendor-thumb svg{width:32px;height:32px;}
+  .vendor-info{flex:1;min-width:0;}
+  .vendor-info .name{font-weight:800;font-size:16px;margin:0 0 2px;}
+  .vendor-info .tag{font-size:12.5px;color:var(--sub);}
+  .vendor-info .meta{font-size:11px;color:#9ca0aa;margin-top:6px;display:flex;flex-direction:column;gap:2px;}
+  .chev{color:#c7c9d1;font-size:20px;}
+
+  .qr-banner{padding:10px 14px;border-radius:12px;background:var(--info-bg);
+    border:1px dashed #c9e7fc;font-size:12.5px;color:var(--info-text);display:flex;gap:8px;align-items:center;}
+
+  .section-title{font-size:12.5px;font-weight:700;color:var(--sub);text-transform:uppercase;
+    letter-spacing:.06em;margin:6px 2px 0;}
+
+  .menu-hero{position:relative;height:190px;flex:0 0 190px;overflow:hidden;background-size:cover;background-position:center;
+    display:flex;align-items:flex-end;}
+  .menu-hero .hero-fallback-icon{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.9;}
+  .menu-hero .hero-fallback-icon svg{width:80px;height:80px;}
+  .menu-hero::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 40%,rgba(0,0,0,.62) 100%);}
+  .menu-hero .hero-caption{position:relative;z-index:1;padding:14px 18px 12px;color:#fff;}
+  .menu-hero .hero-caption h1{margin:0;font-size:20px;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.3);}
+  .menu-hero .hero-caption .tag{font-size:12px;opacity:.92;margin-top:2px;}
+
+  .search-bar{display:flex;align-items:center;gap:8px;background:var(--card);border:1.5px solid var(--line);
+    border-radius:12px;padding:10px 12px;}
+  .search-bar svg{width:16px;height:16px;color:var(--sub);flex:0 0 auto;}
+  .search-bar input{border:none;outline:none;flex:1;font-size:14px;background:transparent;}
+
+  .filter-row{display:flex;gap:8px;overflow-x:auto;padding:2px 0 4px;-ms-overflow-style:none;scrollbar-width:none;}
+  .filter-row::-webkit-scrollbar{display:none;}
+  .filter-chip{flex:0 0 auto;padding:8px 15px;border-radius:20px;background:var(--card);border:1.5px solid var(--line);
+    font-size:13px;font-weight:700;color:var(--sub);cursor:pointer;white-space:nowrap;}
+  .filter-chip.active{background:var(--brand);border-color:var(--brand);color:#fff;}
+
+  .menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+  .menu-card{background:var(--card);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;
+    display:flex;flex-direction:column;}
+  .mi-thumb{width:100%;height:118px;flex:0 0 118px;background-size:cover;
+    background-position:center;display:flex;align-items:center;justify-content:center;}
+  .mi-thumb svg{width:52px;height:52px;}
+  .menu-card .mc-body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:2px;flex:1;}
+  .menu-card .mi-name{font-weight:700;font-size:13.5px;line-height:1.3;min-height:2.5em;}
+  .menu-card .mi-group{font-size:11px;color:var(--sub);}
+  .menu-card .mi-price{font-weight:800;font-size:14px;color:var(--ink);margin:2px 0 8px;}
+  .menu-card .mc-action{margin-top:auto;}
+  .menu-card .add-btn{width:100%;text-align:center;}
+  .qty-box{display:flex;align-items:center;gap:0;background:var(--brand);border-radius:10px;overflow:hidden;height:34px;}
+  .menu-card .qty-box{width:100%;justify-content:space-between;}
+  .menu-card .qty-box span{flex:1;}
+  .qty-box button{background:transparent;border:none;color:#fff;font-size:17px;font-weight:800;
+    width:32px;height:34px;cursor:pointer;}
+  .qty-box span{color:#fff;font-weight:700;font-size:14px;min-width:20px;text-align:center;}
+  .add-btn{background:#fff;color:var(--brand);border:1.5px solid var(--brand);font-weight:800;
+    font-size:13px;padding:8px 16px;border-radius:10px;cursor:pointer;flex:0 0 auto;}
+
+  .cart-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line);}
+  .cart-row:last-child{border-bottom:none;}
+  .cart-row .cr-name{flex:1;font-size:14px;font-weight:600;}
+  .cart-row .cr-sub{font-size:11.5px;color:var(--sub);}
+  .cart-row .cr-amt{font-weight:700;font-size:13.5px;}
+
+  .coupon-row{display:flex;gap:8px;}
+  .coupon-row input{flex:1;}
+  .coupon-applied{display:flex;align-items:center;justify-content:space-between;background:#f0fdf4;
+    border:1px solid #bbf7d0;color:#15803d;border-radius:10px;padding:9px 12px;font-size:12.5px;font-weight:700;}
+  .coupon-applied .remove-coupon{cursor:pointer;color:#166534;font-weight:800;}
+
+  .totals-row{display:flex;justify-content:space-between;font-size:14px;padding:5px 0;color:var(--sub);}
+  .totals-row.discount{color:#15803d;}
+  .totals-row.grand{font-size:16.5px;font-weight:800;color:var(--ink);border-top:1.5px dashed var(--line);
+    margin-top:6px;padding-top:12px;}
+
+  .paying-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding:40px 24px;text-align:center;}
+  .spinner{width:54px;height:54px;border-radius:50%;border:5px solid var(--line);border-top-color:var(--brand);
+    animation:spin 0.9s linear infinite;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+
+  .qr-wrap{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0 4px;}
+  .qr-wrap img{width:200px;height:200px;border-radius:12px;border:1px solid var(--line);padding:10px;background:#fff;}
+
+  .success-wrap{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;
+    gap:6px;padding:36px 24px 20px;text-align:center;}
+  .tick{width:76px;height:76px;border-radius:50%;background:var(--good);display:flex;align-items:center;
+    justify-content:center;color:#fff;font-size:38px;margin-bottom:6px;animation:pop .4s ease;}
+  @keyframes pop{0%{transform:scale(0);}70%{transform:scale(1.12);}100%{transform:scale(1);}}
+
+  .status-track{display:flex;justify-content:space-between;margin:22px 0 4px;position:relative;}
+  .status-track::before{content:"";position:absolute;top:13px;left:24px;right:24px;height:2px;background:var(--line);z-index:0;}
+  .status-track .st{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:6px;flex:1;}
+  .status-track .dot{width:26px;height:26px;border-radius:50%;background:var(--line);color:#9ca0aa;
+    display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;transition:.3s;}
+  .status-track .st.done .dot{background:var(--good);color:#fff;}
+  .status-track .st.active .dot{background:var(--brand);color:#fff;}
+  .status-track .lbl{font-size:10.5px;color:var(--sub);font-weight:600;text-align:center;}
+
+  .profile-row{display:flex;justify-content:space-between;align-items:center;padding:14px 0;border-bottom:1px solid var(--line);font-size:14px;}
+  .profile-row:last-child{border-bottom:none;}
+  .profile-row .pv{color:var(--sub);}
+
+  .coin-card{background:linear-gradient(135deg,#ffd76b,#ffb03b);border-radius:16px;padding:18px;color:#5a3b00;
+    display:flex;align-items:center;gap:14px;box-shadow:0 8px 20px rgba(255,176,59,.35);}
+  .coin-card .coin-icon{width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.35);
+    display:flex;align-items:center;justify-content:center;font-size:24px;flex:0 0 auto;}
+  .coin-card .coin-num{font-size:22px;font-weight:800;}
+  .coin-card .coin-lbl{font-size:11.5px;opacity:.85;}
+
+  .order-card{background:var(--card);border-radius:14px;box-shadow:var(--shadow);padding:14px;}
+  .order-card .oc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+  .order-card .oc-inv{font-weight:800;font-size:13.5px;}
+  .order-card .oc-date{font-size:11px;color:var(--sub);}
+  .order-card .oc-items{font-size:12.5px;color:var(--sub);}
+  .order-card .oc-total{font-weight:800;font-size:14px;margin-top:8px;text-align:right;}
+
+  .empty-cart{text-align:center;color:var(--sub);font-size:13.5px;padding:30px 10px;}
+  .badge{display:inline-block;background:var(--info-bg);color:var(--info-text);font-size:10.5px;font-weight:800;
+    padding:3px 8px;border-radius:20px;margin-left:6px;}
+
+  .stage-pill{display:inline-block;font-size:10px;font-weight:800;padding:3px 9px;border-radius:20px;margin-left:6px;
+    text-transform:uppercase;letter-spacing:.02em;}
+  .stage-pill.confirmed{background:var(--info-bg);color:var(--info-text);}
+  .stage-pill.preparing{background:#fff2df;color:#a3711f;}
+  .stage-pill.served{background:#e1ede4;color:var(--good);}
+
+  .fb-box{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);}
+  .fb-stars{display:flex;gap:4px;}
+  .fb-star{font-size:22px;line-height:1;cursor:pointer;color:var(--line);user-select:none;}
+  .fb-star.on{color:#ffb03b;}
+  .fb-box textarea{width:100%;margin-top:8px;padding:8px 10px;border:1px solid var(--line);border-radius:10px;
+    font:inherit;font-size:12.5px;resize:vertical;min-height:44px;background:var(--card);color:var(--ink);}
+  .fb-submit{margin-top:8px;padding:8px 14px;border:none;border-radius:20px;background:var(--brand);color:#fff;
+    font-weight:700;font-size:12px;cursor:pointer;}
+  .fb-done{margin-top:10px;padding-top:10px;border-top:1px dashed var(--line);font-size:12.5px;color:var(--good);font-weight:700;}
+  .order-card.fb-highlight{outline:2px solid var(--brand);outline-offset:2px;}
+
+  /* Toast */
+  .toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%) translateY(20px);background:#1b1d23;
+    color:#fff;padding:12px 18px;border-radius:12px;font-size:13.5px;font-weight:600;box-shadow:0 10px 24px rgba(0,0,0,.25);
+    opacity:0;transition:.25s;z-index:50;max-width:90%;text-align:center;pointer-events:none;}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- SPLASH -->
+  <div class="screen active" id="splash">
+    <div class="splash-logo">
+      <svg viewBox="0 0 44 44" fill="none"><path d="M11 6v13M15 6v13M19 6v13" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/><path d="M15 19v19" stroke="#fff" stroke-width="2.8" stroke-linecap="round"/><path d="M30 6c-3 0-5 3-5 7s2 6 5 8v17" stroke="#fff" stroke-width="2.8" fill="none" stroke-linecap="round"/></svg>
+    </div>
+    <h1>CampusBite</h1>
+    <p>Corporate Cafeteria, reimagined</p>
+    <div class="dots"><span></span><span></span><span></span></div>
+  </div>
+
+  <!-- LOGIN -->
+  <div class="screen" data-screen="login">
+    <div class="brandhero">
+      <div class="logo">🍽️</div>
+      <h1>CampusBite</h1>
+      <p>Order from any counter in the cafeteria — no queue.</p>
+    </div>
+    <div class="content">
+      <div id="qrBanner" class="qr-banner" style="display:none;">
+        📍 <span id="qrBannerText"></span>
+      </div>
+      <div class="card">
+        <label class="field">Your name</label>
+        <input class="text" id="loginName" placeholder="e.g. Rahul Sharma" />
+        <label class="field">Mobile number</label>
+        <input class="text" id="loginPhone" placeholder="e.g. 98765 43210" inputmode="numeric" maxlength="10" />
+      </div>
+      <button class="btn" id="loginBtn">Send OTP</button>
+    </div>
+  </div>
+
+  <!-- OTP -->
+  <div class="screen" data-screen="otp">
+    <div class="brandhero" style="padding-top:50px;">
+      <div class="logo">🔐</div>
+      <h1 style="font-size:21px;">Verify your number</h1>
+      <p id="otpSentTo">OTP sent to +91 XXXXXXXXXX</p>
+    </div>
+    <div class="content">
+      <div class="otp-row">
+        <input class="otp-box" maxlength="1" inputmode="numeric" data-i="0">
+        <input class="otp-box" maxlength="1" inputmode="numeric" data-i="1">
+        <input class="otp-box" maxlength="1" inputmode="numeric" data-i="2">
+        <input class="otp-box" maxlength="1" inputmode="numeric" data-i="3">
+      </div>
+      <p style="text-align:center;font-size:11.5px;color:var(--sub);margin-top:-6px;">
+        Didn't receive it? <span style="color:var(--brand);font-weight:700;">Resend code</span>
+      </p>
+      <button class="btn" id="verifyOtpBtn">Verify &amp; Continue</button>
+      <button class="btn secondary" id="backToLoginBtn">← Change number</button>
+    </div>
+  </div>
+
+  <!-- MAIN SHELL -->
+  <div class="screen" data-screen="shell">
+    <div class="shell-header">
+      <div class="app-name">🍽️ CampusBite</div>
+      <div class="icon-btn" id="bellBtn" title="Notifications">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M12 3a6 6 0 0 0-6 6v3.5L4 16h16l-2-3.5V9a6 6 0 0 0-6-6z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9.5 19a2.5 2.5 0 0 0 5 0" stroke="currentColor" stroke-width="1.8"/></svg>
+      </div>
+      <div class="avatar-btn" id="avatarBtn">R</div>
+    </div>
+
+    <div class="shell-body">
+
+      <!-- AGGREGATOR (vendor list) -->
+      <div class="shell-page active" data-page="aggregator">
+        <div class="content" id="vendorList">
+          <div class="section-title">Registered restaurants</div>
+        </div>
+      </div>
+
+      <!-- MENU -->
+      <div class="shell-page" data-page="menu">
+        <div id="menuEmptyState" class="content" style="display:none;flex:1;align-items:center;justify-content:center;text-align:center;">
+          <div>
+            <div style="font-size:40px;">🍽️</div>
+            <p style="color:var(--sub);font-size:14px;margin:10px 0 16px;">Select a restaurant first to see its menu.</p>
+            <button class="btn small" id="goPickVendorBtn">Browse Restaurants</button>
+          </div>
+        </div>
+        <div id="menuContentWrap">
+          <div class="menu-hero" id="menuHero">
+            <div class="hero-fallback-icon" id="menuHeroIcon"></div>
+            <div class="hero-caption">
+              <h1 id="menuVendorName">Restaurant</h1>
+              <div class="tag" id="menuVendorTag">Menu</div>
+            </div>
+          </div>
+          <div class="content" style="padding-top:14px;">
+            <div class="search-bar">
+              <svg viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/><line x1="21" y1="21" x2="16.5" y2="16.5" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+              <input id="menuSearch" placeholder="Search dishes…" />
+            </div>
+            <div class="filter-row" id="filterRow"></div>
+            <div id="menuList" class="menu-grid"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- CART -->
+      <div class="shell-page" data-page="cart">
+        <div class="content">
+          <div class="section-title" id="cartVendorLabel">Your cart</div>
+          <div class="card" id="cartItemsCard"></div>
+
+          <div id="cartExtras" style="display:none;flex-direction:column;gap:14px;">
+            <div class="section-title">Add a note for the kitchen</div>
+            <div class="card">
+              <textarea class="text" id="cartRemarks" rows="2" placeholder="e.g. less spicy, no onion (optional)"></textarea>
+            </div>
+
+            <div class="section-title">Coupon code</div>
+            <div class="card" id="couponCard">
+              <div class="coupon-row" id="couponInputRow">
+                <input class="text" id="couponInput" placeholder="e.g. WELCOME10" style="text-transform:uppercase;">
+                <button class="btn small" id="applyCouponBtn">Apply</button>
+              </div>
+              <div id="couponAppliedRow" style="display:none;"></div>
+              <div id="couponError" style="color:#dc2626;font-size:12px;margin-top:6px;display:none;"></div>
+            </div>
+
+            <div class="section-title">Table / Counter</div>
+            <div class="card">
+              <input class="text" id="tableInput" placeholder="e.g. T-12 (optional)" />
+            </div>
+
+            <div class="card">
+              <div class="totals-row"><span>Item total</span><span id="sumItems">₹0</span></div>
+              <div class="totals-row discount" id="sumDiscountRow" style="display:none;"><span>Coupon discount</span><span id="sumDiscount">-₹0</span></div>
+              <div class="totals-row grand"><span>To pay</span><span id="sumGrand">₹0</span></div>
+            </div>
+
+            <button class="btn" id="payBtn">Proceed to Pay</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ORDER LOG -->
+      <div class="shell-page" data-page="orderlog">
+        <div class="content">
+          <div class="coin-card">
+            <div class="coin-icon">🪙</div>
+            <div>
+              <div class="coin-num" id="coinCount">0</div>
+              <div class="coin-lbl">CampusBite Coins earned — redeem later</div>
+            </div>
+          </div>
+          <div class="section-title">Your orders</div>
+          <div id="orderLogList" style="display:flex;flex-direction:column;gap:10px;">
+            <div class="empty-cart">No orders yet.</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="shell-page" data-page="settings">
+        <div class="content">
+          <div class="card">
+            <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px;">
+              <div style="width:52px;height:52px;border-radius:50%;background:var(--info-bg);color:var(--info-text);
+                display:flex;align-items:center;justify-content:center;font-weight:800;font-size:20px;" id="avatarInitial">R</div>
+              <div>
+                <div style="font-weight:800;font-size:16px;" id="profileName">—</div>
+                <div style="color:var(--sub);font-size:12.5px;" id="profilePhone">—</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="profile-row"><span>Email</span><span class="pv" id="profileEmail">—</span></div>
+            <div class="profile-row"><span>Loyalty program</span><span class="pv">1 coin / order</span></div>
+            <div class="profile-row"><span>Coins balance</span><span class="pv" id="settingsCoins">0</span></div>
+          </div>
+
+          <button class="btn secondary" id="logoutBtn">Switch user</button>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="tabbar" id="tabbar">
+      <button class="tab-btn active" data-tab="aggregator">
+        <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="3" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="3" y="13" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/><rect x="13" y="13" width="8" height="8" rx="2" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span class="tlabel">Aggregator</span>
+      </button>
+      <button class="tab-btn" data-tab="menu">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 3v8M9 3v8M6 11c0 1.5 1.5 2.5 3 2.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M9 13.5V21" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><path d="M17 3c-1.7 0-3 1.8-3 4s1.3 3.5 3 4v10" stroke="currentColor" stroke-width="1.8" fill="none" stroke-linecap="round"/></svg>
+        <span class="tlabel">Menu</span>
+      </button>
+      <button class="tab-btn" data-tab="cart" style="position:relative;">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M4 7h16l-1.5 10.5a2 2 0 0 1-2 1.7H7.5a2 2 0 0 1-2-1.7L4 7z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 7V5.5A4 4 0 0 1 12 1.5a4 4 0 0 1 4 4V7" stroke="currentColor" stroke-width="1.8"/></svg>
+        <span class="tlabel">Cart</span>
+        <span class="tab-badge" id="cartTabBadge" style="display:none;">0</span>
+      </button>
+      <button class="tab-btn" data-tab="orderlog">
+        <svg viewBox="0 0 24 24" fill="none"><path d="M6 2h12v20l-3-2-3 2-3-2-3 2V2z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><line x1="9" y1="7" x2="15" y2="7" stroke="currentColor" stroke-width="1.6"/><line x1="9" y1="11" x2="15" y2="11" stroke="currentColor" stroke-width="1.6"/></svg>
+        <span class="tlabel">Order Log</span>
+      </button>
+      <button class="tab-btn" data-tab="settings">
+        <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.8"/><path d="M19.4 13.5a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.87-.34 1.7 1.7 0 0 0-1 1.55V19.5a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1.11-1.55 1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.87 1.7 1.7 0 0 0-1.55-1H4.5a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1.11 1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.87.34H10a1.7 1.7 0 0 0 1-1.55V4.5a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.87V10c.14.4.44.85 1.55 1H19.5a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <span class="tlabel">Settings</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- PAYMENT / QR -->
+  <div class="screen" data-screen="payment">
+    <div class="topbar">
+      <div class="back" id="backFromPayment">←</div>
+      <h1>Scan &amp; Pay</h1>
+    </div>
+    <div class="content" style="align-items:center;">
+      <div class="card" style="width:100%;">
+        <div class="totals-row grand" style="border:none;margin:0;padding:0;justify-content:center;">
+          <span id="paymentAmountLabel">₹0</span>
+        </div>
+      </div>
+      <div class="qr-wrap">
+        <img id="paymentQrImg" src="" alt="Payment QR" />
+        <div style="font-size:12px;color:var(--sub);">Scan with any UPI app</div>
+      </div>
+      <button class="btn" id="confirmPaymentBtn" style="margin-top:8px;">I've Paid — Confirm Order</button>
+      <button class="btn secondary" id="cancelPaymentBtn">Cancel</button>
+    </div>
+  </div>
+
+  <!-- PAYING (processing) -->
+  <div class="screen" data-screen="paying">
+    <div class="paying-wrap">
+      <div class="spinner"></div>
+      <div>
+        <div style="font-weight:800;font-size:16px;">Confirming payment…</div>
+        <div style="color:var(--sub);font-size:13px;margin-top:4px;">Placing your order with the kitchen</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div class="screen" data-screen="success">
+    <div class="success-wrap">
+      <div class="tick">✓</div>
+      <div style="font-weight:800;font-size:19px;">Payment Successful</div>
+      <div style="color:var(--sub);font-size:13.5px;" id="successSub">Order confirmed at Restaurant</div>
+
+      <div class="card" style="width:100%;margin-top:18px;text-align:left;">
+        <div class="profile-row"><span>Order ID</span><span class="pv" id="orderInvoiceNo">—</span></div>
+        <div class="profile-row"><span>Amount paid</span><span class="pv" id="orderAmount">—</span></div>
+        <div class="profile-row"><span>Table / Counter</span><span class="pv" id="orderTable">—</span></div>
+      </div>
+
+      <div class="card" style="width:100%;margin-top:14px;text-align:left;">
+        <div class="status-track" id="statusTrack">
+          <div class="st" data-stage="Confirmed"><div class="dot">1</div><div class="lbl">Confirmed</div></div>
+          <div class="st" data-stage="Preparing"><div class="dot">2</div><div class="lbl">Preparing</div></div>
+          <div class="st" data-stage="Served"><div class="dot">3</div><div class="lbl">Served</div></div>
+        </div>
+        <div style="margin-top:10px;font-size:11px;color:var(--sub);" id="statusFootnote">
+          🔔 The restaurant has been notified · 🪙 +1 CampusBite Coin earned
+        </div>
+      </div>
+
+      <button class="btn" style="margin-top:22px;" id="orderMoreBtn">Order from another restaurant</button>
+      <button class="btn secondary" style="margin-top:10px;" id="viewLogBtn">View Order Log</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+  "use strict";
+  var API_BASE = "";
+
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function(){
+      navigator.serviceWorker.register("/campusbite-sw.js").catch(function(){});
+    });
+  }
+
+  // ---------------------------------------------------------------
+  // Category icons (inline SVG — zero network dependency) used only
+  // as a fallback when a real, verified photo isn't available for
+  // that vendor/item, so nothing ever shows a mismatched image.
+  // ---------------------------------------------------------------
+  var ICONS = {
+    thali:      { color:"#e07a3f", svg:'<circle cx="22" cy="22" r="17" fill="currentColor" opacity=".18"/><circle cx="22" cy="22" r="7" fill="currentColor"/><circle cx="10" cy="14" r="3.2" fill="currentColor"/><circle cx="34" cy="14" r="3.2" fill="currentColor"/><circle cx="10" cy="30" r="3.2" fill="currentColor"/><circle cx="34" cy="30" r="3.2" fill="currentColor"/>' },
+    dosa:       { color:"#d99a3d", svg:'<path d="M8 26c0-10 8-18 18-18 6 0 11 3 14 7-2-1-5-2-8-2-11 0-20 7-22 17-1 4 0 8 2 11-8-2-14-8-14-15z" fill="currentColor"/>' },
+    biryani:    { color:"#c1502e", svg:'<path d="M8 22c0 8 6 13 14 13s14-5 14-13H8z" fill="currentColor"/><rect x="6" y="19.5" width="32" height="3" rx="1.5" fill="currentColor"/><path d="M16 10c0 2-2 2-2 4s2 2 2 4M22 8c0 2-2 2-2 4s2 2 2 4M28 10c0 2-2 2-2 4s2 2 2 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>' },
+    curry:      { color:"#b5442f", svg:'<path d="M9 24c0 7 6 11 13 11s13-4 13-11H9z" fill="currentColor"/><ellipse cx="22" cy="24" rx="13" ry="3" fill="currentColor" opacity=".55"/><path d="M17 11c0 2-2 2-2 4s2 2 2 4M27 11c0 2-2 2-2 4s2 2 2 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>' },
+    tikka:      { color:"#c1662b", svg:'<rect x="5" y="20.8" width="34" height="2.4" rx="1.2" fill="currentColor"/><circle cx="14" cy="22" r="5" fill="currentColor"/><circle cx="24" cy="22" r="5" fill="currentColor"/><circle cx="33" cy="22" r="4" fill="currentColor"/>' },
+    fried:      { color:"#a8562e", svg:'<path d="M27 10c4 0 7 3 7 7 0 3-2 5-4 6l-9 9c-2 2-5 2-7 0s-2-5 0-7l9-9c1-2 3-6 4-6z" fill="currentColor"/><circle cx="13" cy="33" r="4" fill="currentColor" opacity=".65"/>' },
+    manchurian: { color:"#74893f", svg:'<path d="M6 24c0 0 4 3 16 3s16-3 16-3" stroke="currentColor" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="14" cy="19" r="4" fill="currentColor"/><circle cx="22" cy="15" r="4" fill="currentColor"/><circle cx="30" cy="19" r="4" fill="currentColor"/>' },
+    springroll: { color:"#c88a2e", svg:'<rect x="9" y="14" width="26" height="16" rx="8" fill="currentColor"/><line x1="17.5" y1="14" x2="17.5" y2="30" stroke="#fff" stroke-width="1.6" opacity=".55"/><line x1="26.5" y1="14" x2="26.5" y2="30" stroke="#fff" stroke-width="1.6" opacity=".55"/>' },
+    friedrice:  { color:"#6b8e4e", svg:'<path d="M9 24c0 7 6 11 13 11s13-4 13-11H9z" fill="currentColor"/><circle cx="16" cy="20" r="1.4" fill="#fff"/><circle cx="22" cy="18" r="1.4" fill="#fff"/><circle cx="28" cy="20" r="1.4" fill="#fff"/><ellipse cx="24" cy="22" rx="3" ry="1.6" fill="#8bc34a"/>' },
+    noodles:    { color:"#cf6a2c", svg:'<path d="M9 24c0 7 6 11 13 11s13-4 13-11H9z" fill="currentColor"/><path d="M14 20c2-2 4 2 6 0s4 2 6 0 4 2 6 0" stroke="#fff" stroke-width="1.7" fill="none" stroke-linecap="round"/>' },
+    coffee:     { color:"#6f4e37", svg:'<path d="M10 18h20v8c0 5-4 9-10 9s-10-4-10-9v-8z" fill="currentColor"/><path d="M30 20c3 0 5 2 5 4s-2 4-5 4" stroke="currentColor" stroke-width="2.4" fill="none"/><path d="M16 8c0 2-2 2-2 4s2 2 2 4M24 8c0 2-2 2-2 4s2 2 2 4" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/>' },
+    juice:      { color:"#e8a33d", svg:'<path d="M14 12h16l-2 22a3 3 0 0 1-3 3H19a3 3 0 0 1-3-3l-2-22z" fill="currentColor"/><line x1="27" y1="6" x2="23" y2="18" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><circle cx="22" cy="16" r="3.4" fill="#fff" opacity=".45"/>' },
+    sandwich:   { color:"#d4a24c", svg:'<path d="M8 30l14-16 14 16z" fill="currentColor"/><line x1="12" y1="30" x2="32" y2="30" stroke="currentColor" stroke-width="2.4"/><line x1="15" y1="24" x2="29" y2="24" stroke="#fff" stroke-width="1.6" opacity=".55"/>' },
+    default:    { color:"#9a8f86", svg:'<path d="M11 8v13M15 8v13M19 8v13" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><path d="M15 21v15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M30 8c-3 0-5 3-5 7s2 6 5 8v13" stroke="currentColor" stroke-width="2.4" fill="none" stroke-linecap="round"/>' }
+  };
+
+  function iconKeyFor(itemName){
+    var n = (itemName || "").toLowerCase();
+    if(n.indexOf("thali") > -1) return "thali";
+    if(n.indexOf("dosa") > -1) return "dosa";
+    if(n.indexOf("biryani") > -1) return "biryani";
+    if(n.indexOf("butter chicken") > -1 || n.indexOf("dal makhani") > -1 || n.indexOf("kofta") > -1 || n.indexOf("egg curry") > -1 || n.indexOf("paneer butter") > -1) return "curry";
+    if(n.indexOf("tikka") > -1) return "tikka";
+    if(n.indexOf("65") > -1 || n.indexOf("lollipop") > -1 || n.indexOf("fish finger") > -1 || n.indexOf("prawn") > -1) return "fried";
+    if(n.indexOf("manchurian") > -1) return "manchurian";
+    if(n.indexOf("spring roll") > -1) return "springroll";
+    if(n.indexOf("fried rice") > -1) return "friedrice";
+    if(n.indexOf("noodles") > -1) return "noodles";
+    if(n.indexOf("coffee") > -1) return "coffee";
+    if(n.indexOf("juice") > -1 || n.indexOf("soda") > -1) return "juice";
+    if(n.indexOf("sandwich") > -1) return "sandwich";
+    return "default";
+  }
+
+  function iconMarkup(key, white){
+    var meta = ICONS[key] || ICONS.default;
+    var color = white ? "#ffffff" : meta.color;
+    return '<svg viewBox="0 0 44 44" style="color:'+color+'">'+meta.svg+'</svg>';
+  }
+
+  function shadeColor(hex, percent){
+    hex = hex.replace("#","");
+    var num = parseInt(hex,16);
+    var r = (num >> 16) + Math.round(2.55*percent);
+    var g = ((num >> 8) & 0xff) + Math.round(2.55*percent);
+    var b = (num & 0xff) + Math.round(2.55*percent);
+    r = Math.min(255, Math.max(0, r));
+    g = Math.min(255, Math.max(0, g));
+    b = Math.min(255, Math.max(0, b));
+    return "#" + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+  }
+
+  var VENDOR_THEME = {
+    SSK: { icon:"thali",   c1:"#ffb27a", c2:"#e0672f" },
+    PT:  { icon:"curry",   c1:"#ff9a6b", c2:"#c1502e" },
+    WR:  { icon:"noodles", c1:"#ffb769", c2:"#cf6a2c" },
+    BT:  { icon:"coffee",  c1:"#9c7355", c2:"#5c3a22" }
+  };
+
+  function vendorThumbHtml(v){
+    var theme = VENDOR_THEME[v.key] || VENDOR_THEME.SSK;
+    if(v.hero_image){
+      return '<div class="vendor-thumb" style="background-image:url(\''+v.hero_image+'\')"></div>';
+    }
+    return '<div class="vendor-thumb" style="background:linear-gradient(150deg,'+theme.c1+','+theme.c2+')">'+iconMarkup(theme.icon, true)+'</div>';
+  }
+
+  function itemThumbHtml(item){
+    if(item.image){
+      return '<div class="mi-thumb" style="background-image:url(\''+item.image+'\')"></div>';
+    }
+    var key = iconKeyFor(item.item_name);
+    var meta = ICONS[key] || ICONS.default;
+    var light = shadeColor(meta.color, 16);
+    var dark = shadeColor(meta.color, -22);
+    return '<div class="mi-thumb" style="background:linear-gradient(150deg,'+light+','+dark+')">'+iconMarkup(key, true)+'</div>';
+  }
+
+  var GROUP_LABELS = { "Cafeteria Food": "Signature", "Main Course": "Mains", "Starter": "Starters", "Juice": "Beverages" };
+  function groupLabel(g){ return GROUP_LABELS[g] || g; }
+
+  var state = {
+    user: { name: "", phone: "" },
+    vendors: [],
+    currentVendor: null,
+    menu: [],
+    activeFilter: "All",
+    searchQuery: "",
+    cart: {},
+    coupon: null, // {code,label,discount}
+    lastOrder: null,
+    activeTab: "aggregator"
+  };
+
+  function $(sel){ return document.querySelector(sel); }
+  function $all(sel, root){ return (root || document).querySelectorAll(sel); }
+  function rupee(n){ return "₹" + Math.round(n).toLocaleString("en-IN"); }
+
+  var toastTimer = null;
+  function toast(msg){
+    var t = $("#toast");
+    t.textContent = msg;
+    t.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ t.classList.remove("show"); }, 2400);
+  }
+
+  function showScreenByAttr(name){
+    $all(".screen").forEach(function(s){ s.classList.remove("active"); });
+    var el = document.querySelector('.screen[data-screen="'+name+'"]');
+    if(el) el.classList.add("active");
+    window.scrollTo(0,0);
+  }
+
+  // credentials:"omit" on every call — this app must always act as a pure
+  // guest, even if the same browser also has an active ERPNext desk login
+  // (/app) open in another tab. Without this, a stray session cookie makes
+  // Frappe demand a CSRF token this guest app never sends, and every write
+  // (place_order, submit_feedback, ...) fails with HTTP 400.
+  function apiGet(method, params){
+    var qs = params ? ("?" + new URLSearchParams(params).toString()) : "";
+    return fetch(API_BASE + "/api/method/" + method + qs, {
+      credentials: "omit"
+    }).then(function(r){ return r.json(); }).then(function(d){ return d.message; });
+  }
+
+  function apiPost(method, body){
+    return fetch(API_BASE + "/api/method/" + method, {
+      method: "POST",
+      credentials: "omit",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function(r){
+      return r.json().then(function(d){
+        if(!r.ok){ throw (d.exception || d.message || "Request failed"); }
+        return d.message;
+      });
+    });
+  }
+
+  // ---------- QR deep link handling ----------
+  var qrVendorKey = null, qrTable = null, qrFeedbackInvoice = null;
+  function parseQR(){
+    var params = new URLSearchParams(window.location.search);
+    var vendor = params.get("vendor");
+    var table = params.get("table");
+    var feedback = params.get("feedback");
+    if(vendor){
+      qrVendorKey = vendor;
+      qrTable = table || null;
+      var banner = $("#qrBanner");
+      banner.style.display = "flex";
+      $("#qrBannerText").textContent = "Scanned at " + vendor + (table ? (" · Table " + table) : "") + " — you'll land on their menu after login.";
+    }
+    if(feedback){
+      qrFeedbackInvoice = feedback;
+    }
+  }
+
+  // ---------- SPLASH ----------
+  setTimeout(function(){
+    var saved = localStorage.getItem("cb_user");
+    if(saved){
+      try{
+        state.user = JSON.parse(saved);
+        $("#loginName").value = state.user.name;
+        $("#loginPhone").value = state.user.phone;
+      }catch(e){}
+    }
+    showScreenByAttr("login");
+  }, 3000);
+
+  // ---------- LOGIN -> OTP ----------
+  $("#loginBtn").addEventListener("click", function(){
+    var name = $("#loginName").value.trim();
+    var phone = $("#loginPhone").value.trim();
+    if(!name || phone.length < 10){
+      toast("Enter your name and a valid 10-digit mobile number");
+      return;
+    }
+    state.user.name = name;
+    state.user.phone = phone;
+    localStorage.setItem("cb_user", JSON.stringify(state.user));
+    $("#otpSentTo").textContent = "OTP sent to +91 " + phone;
+    showScreenByAttr("otp");
+    var boxes = $all(".otp-box");
+    boxes.forEach(function(b){ b.value = ""; });
+    boxes[0].focus();
+  });
+
+  $("#backToLoginBtn").addEventListener("click", function(){ showScreenByAttr("login"); });
+
+  // ---------- OTP boxes behaviour ----------
+  (function(){
+    var boxes = $all(".otp-box");
+    boxes.forEach(function(box, idx){
+      box.addEventListener("input", function(){
+        box.value = box.value.replace(/[^0-9]/g,"").slice(0,1);
+        if(box.value && idx < boxes.length - 1){ boxes[idx+1].focus(); }
+      });
+      box.addEventListener("keydown", function(e){
+        if(e.key === "Backspace" && !box.value && idx > 0){ boxes[idx-1].focus(); }
+      });
+    });
+  })();
+
+  $("#verifyOtpBtn").addEventListener("click", function(){
+    var code = Array.prototype.map.call($all(".otp-box"), function(b){ return b.value; }).join("");
+    if(code !== "1234"){
+      toast("Incorrect code — please try again");
+      return;
+    }
+    enterApp();
+  });
+
+  // ---------- MAIN APP ----------
+  function enterApp(){
+    $("#avatarBtn").textContent = state.user.name.trim().charAt(0).toUpperCase();
+    $("#avatarInitial").textContent = state.user.name.trim().charAt(0).toUpperCase();
+    $("#profileName").textContent = state.user.name;
+    $("#profilePhone").textContent = "+91 " + state.user.phone;
+    $("#profileEmail").textContent = state.user.name.trim().toLowerCase().replace(/\s+/g,".") + "@campusbite.in";
+    showScreenByAttr("shell");
+    loadVendors().then(function(){
+      if(qrFeedbackInvoice){
+        pendingFeedbackInvoice = qrFeedbackInvoice;
+        qrFeedbackInvoice = null;
+        switchTab("orderlog");
+      } else if(qrVendorKey && state.vendors.some(function(v){return v.key === qrVendorKey;})){
+        openVendor(qrVendorKey);
+        switchTab("menu");
+        qrVendorKey = null;
+      } else {
+        switchTab("aggregator");
+      }
+    });
+  }
+
+  // ---------- TAB NAVIGATION ----------
+  function switchTab(tab){
+    if(tab === "menu" && !state.currentVendor){
+      toast("Please select an aggregator (restaurant) first");
+      renderMenuEmptyState(true);
+      tab = "menu"; // still let them see the empty state + browse button
+    }
+    state.activeTab = tab;
+    $all(".tab-btn").forEach(function(b){ b.classList.toggle("active", b.getAttribute("data-tab") === tab); });
+    $all(".shell-page").forEach(function(p){ p.classList.toggle("active", p.getAttribute("data-page") === tab); });
+    if(tab === "orderlog") loadOrderLog();
+    if(tab === "cart") renderCartPage();
+    window.scrollTo(0,0);
+  }
+
+  $all(".tab-btn").forEach(function(btn){
+    btn.addEventListener("click", function(){ switchTab(btn.getAttribute("data-tab")); });
+  });
+
+  $("#avatarBtn").addEventListener("click", function(){ switchTab("settings"); });
+  $("#bellBtn").addEventListener("click", function(){ toast("You're all caught up 🔔"); });
+  $("#goPickVendorBtn").addEventListener("click", function(){ switchTab("aggregator"); });
+
+  function renderMenuEmptyState(empty){
+    $("#menuEmptyState").style.display = empty ? "flex" : "none";
+    $("#menuContentWrap").style.display = empty ? "none" : "block";
+  }
+
+  // ---------- AGGREGATOR (vendor list) ----------
+  function loadVendors(){
+    return apiGet("ury.ury.api.campusbite.get_vendors").then(function(vendors){
+      state.vendors = vendors;
+      var list = $("#vendorList");
+      list.innerHTML = '<div class="section-title">Registered restaurants</div>';
+      vendors.forEach(function(v){
+        var card = document.createElement("div");
+        card.className = "vendor-card";
+        card.innerHTML =
+          vendorThumbHtml(v) +
+          '<div class="vendor-info">' +
+            '<p class="name">'+v.label+'</p>' +
+            '<div class="tag">'+v.tagline+'</div>' +
+            '<div class="meta">' +
+              '<span>✉️ '+v.email+'</span>' +
+              '<span>📞 '+v.phone+'</span>' +
+            '</div>' +
+          '</div>' +
+          '<div class="chev">›</div>';
+        card.addEventListener("click", function(){
+          openVendor(v.key);
+          switchTab("menu");
+        });
+        list.appendChild(card);
+      });
+    }).catch(function(err){
+      $("#vendorList").innerHTML = '<div class="empty-cart">Could not load restaurants. Pull to refresh.</div>';
+      console.error(err);
+    });
+  }
+
+  // ---------- MENU ----------
+  function openVendor(key){
+    var v = state.vendors.find(function(x){ return x.key === key; });
+    if(state.currentVendor && state.currentVendor.key !== key && Object.keys(state.cart).length){
+      if(!confirm("Switching restaurants will clear your current cart. Continue?")) return;
+    }
+    state.currentVendor = v;
+    state.cart = {};
+    state.coupon = null;
+    state.activeFilter = "All";
+    state.searchQuery = "";
+    $("#menuSearch").value = "";
+    renderMenuEmptyState(false);
+    apiGet("ury.ury.api.campusbite.get_menu", {vendor:key}).then(function(data){
+      state.menu = data.items;
+      $("#menuVendorName").textContent = data.vendor;
+      $("#menuVendorTag").textContent = data.tagline;
+      renderHero(v);
+      renderFilters();
+      renderMenu();
+      if(qrTable){ $("#tableInput").value = qrTable; }
+      updateCartBadge();
+    });
+  }
+
+  function renderHero(v){
+    var hero = $("#menuHero");
+    var iconWrap = $("#menuHeroIcon");
+    if(v.hero_image){
+      hero.style.backgroundImage = "url('"+v.hero_image+"')";
+      iconWrap.style.display = "none";
+    } else {
+      var theme = VENDOR_THEME[v.key] || VENDOR_THEME.SSK;
+      hero.style.backgroundImage = "none";
+      hero.style.background = "linear-gradient(150deg,"+theme.c1+","+theme.c2+")";
+      iconWrap.style.display = "flex";
+      iconWrap.innerHTML = iconMarkup(theme.icon, true);
+    }
+  }
+
+  function renderFilters(){
+    var groups = [];
+    state.menu.forEach(function(item){
+      if(groups.indexOf(item.item_group) === -1) groups.push(item.item_group);
+    });
+    var row = $("#filterRow");
+    row.innerHTML = "";
+    var chips = ["All"].concat(groups);
+    chips.forEach(function(g){
+      var chip = document.createElement("div");
+      chip.className = "filter-chip" + (g === state.activeFilter ? " active" : "");
+      chip.textContent = g === "All" ? "All" : groupLabel(g);
+      chip.addEventListener("click", function(){
+        state.activeFilter = g;
+        renderFilters();
+        renderMenu();
+      });
+      row.appendChild(chip);
+    });
+  }
+
+  $("#menuSearch").addEventListener("input", function(){
+    state.searchQuery = this.value.trim().toLowerCase();
+    renderMenu();
+  });
+
+  function renderMenu(){
+    var wrap = $("#menuList");
+    wrap.innerHTML = "";
+    var items = state.menu.filter(function(item){
+      var matchesFilter = state.activeFilter === "All" || item.item_group === state.activeFilter;
+      var matchesSearch = !state.searchQuery || item.item_name.toLowerCase().indexOf(state.searchQuery) > -1;
+      return matchesFilter && matchesSearch;
+    });
+    if(items.length === 0){
+      wrap.innerHTML = '<div class="empty-cart" style="grid-column:1/-1;">No dishes match — try a different search or filter.</div>';
+    }
+    items.forEach(function(item){
+      var card = document.createElement("div");
+      card.className = "menu-card";
+      card.innerHTML =
+        itemThumbHtml(item) +
+        '<div class="mc-body">' +
+          '<div class="mi-name">'+item.item_name+'</div>' +
+          '<div class="mi-group">'+groupLabel(item.item_group)+'</div>' +
+          '<div class="mi-price">'+rupee(item.standard_rate)+'</div>' +
+          '<div class="mc-action qty-holder" data-code="'+item.item_code+'"></div>' +
+        '</div>';
+      wrap.appendChild(card);
+      renderQtyControl(card.querySelector(".qty-holder"), item);
+    });
+  }
+
+  function renderQtyControl(holder, item){
+    var qty = state.cart[item.item_code] ? state.cart[item.item_code].qty : 0;
+    holder.innerHTML = "";
+    if(qty === 0){
+      var btn = document.createElement("button");
+      btn.className = "add-btn";
+      btn.textContent = "ADD +";
+      btn.addEventListener("click", function(){
+        state.cart[item.item_code] = {item_code:item.item_code, item_name:item.item_name, rate:item.standard_rate, qty:1};
+        renderQtyControl(holder, item);
+        updateCartBadge();
+        toast(item.item_name + " added to cart");
+      });
+      holder.appendChild(btn);
+    } else {
+      var box = document.createElement("div");
+      box.className = "qty-box";
+      box.innerHTML = '<button data-act="dec">−</button><span>'+qty+'</span><button data-act="inc">+</button>';
+      box.querySelector('[data-act="dec"]').addEventListener("click", function(){
+        qty -= 1;
+        if(qty <= 0){ delete state.cart[item.item_code]; } else { state.cart[item.item_code].qty = qty; }
+        renderQtyControl(holder, item);
+        updateCartBadge();
+      });
+      box.querySelector('[data-act="inc"]').addEventListener("click", function(){
+        qty += 1;
+        state.cart[item.item_code].qty = qty;
+        renderQtyControl(holder, item);
+        updateCartBadge();
+      });
+      holder.appendChild(box);
+    }
+  }
+
+  function cartTotals(){
+    var count = 0, total = 0;
+    Object.values(state.cart).forEach(function(r){ count += r.qty; total += r.qty * r.rate; });
+    return {count:count, total:total};
+  }
+
+  function updateCartBadge(){
+    var t = cartTotals();
+    var badge = $("#cartTabBadge");
+    if(t.count === 0){ badge.style.display = "none"; }
+    else { badge.style.display = "flex"; badge.textContent = t.count; }
+    if(state.activeTab === "cart") renderCartPage();
+  }
+
+  // ---------- CART TAB ----------
+  function renderCartPage(){
+    if(!state.currentVendor){
+      $("#cartVendorLabel").textContent = "Your cart";
+      $("#cartItemsCard").innerHTML = '<div class="empty-cart">Pick a restaurant and add some items first.</div>';
+      $("#cartExtras").style.display = "none";
+      return;
+    }
+    $("#cartVendorLabel").textContent = "Order from " + state.currentVendor.label;
+    var wrap = $("#cartItemsCard");
+    wrap.innerHTML = "";
+    var entries = Object.values(state.cart);
+    if(entries.length === 0){
+      wrap.innerHTML = '<div class="empty-cart">Your cart is empty. Go to Menu to add items.</div>';
+      $("#cartExtras").style.display = "none";
+      return;
+    }
+    $("#cartExtras").style.display = "flex";
+    entries.forEach(function(r){
+      var row = document.createElement("div");
+      row.className = "cart-row";
+      row.innerHTML =
+        '<div class="cr-name">'+r.item_name+'<div class="cr-sub">'+r.qty+' × '+rupee(r.rate)+'</div></div>' +
+        '<div class="cr-amt">'+rupee(r.qty*r.rate)+'</div>';
+      wrap.appendChild(row);
+    });
+    renderCouponUi();
+    renderTotals();
+  }
+
+  function renderCouponUi(){
+    if(state.coupon){
+      $("#couponInputRow").style.display = "none";
+      var row = $("#couponAppliedRow");
+      row.style.display = "block";
+      row.innerHTML = '<div class="coupon-applied"><span>🏷️ '+state.coupon.code+' applied — '+state.coupon.label+'</span><span class="remove-coupon" id="removeCouponBtn">Remove</span></div>';
+      $("#removeCouponBtn").addEventListener("click", function(){
+        state.coupon = null;
+        renderCouponUi();
+        renderTotals();
+      });
+    } else {
+      $("#couponInputRow").style.display = "flex";
+      $("#couponAppliedRow").style.display = "none";
+      $("#couponAppliedRow").innerHTML = "";
+    }
+  }
+
+  $("#applyCouponBtn").addEventListener("click", function(){
+    var code = $("#couponInput").value.trim();
+    if(!code) return;
+    var t = cartTotals();
+    $("#couponError").style.display = "none";
+    apiPost("ury.ury.api.campusbite.apply_coupon", {code: code, item_total: t.total}).then(function(res){
+      state.coupon = res;
+      renderCouponUi();
+      renderTotals();
+      toast("Coupon applied: " + res.label);
+    }).catch(function(err){
+      $("#couponError").style.display = "block";
+      $("#couponError").textContent = typeof err === "string" ? err : "Invalid coupon code";
+    });
+  });
+
+  function renderTotals(){
+    var t = cartTotals();
+    var discount = state.coupon ? state.coupon.discount : 0;
+    $("#sumItems").textContent = rupee(t.total);
+    if(discount > 0){
+      $("#sumDiscountRow").style.display = "flex";
+      $("#sumDiscount").textContent = "-" + rupee(discount);
+    } else {
+      $("#sumDiscountRow").style.display = "none";
+    }
+    $("#sumGrand").textContent = rupee(Math.max(t.total - discount, 0));
+  }
+
+  // ---------- PAYMENT ----------
+  $("#payBtn").addEventListener("click", function(){
+    var entries = Object.values(state.cart);
+    if(entries.length === 0) return;
+    var t = cartTotals();
+    var discount = state.coupon ? state.coupon.discount : 0;
+    var grand = Math.max(t.total - discount, 0);
+
+    apiGet("ury.ury.api.campusbite.get_payment_qr", {amount: grand, ref: state.currentVendor.label}).then(function(res){
+      $("#paymentQrImg").src = res.qr_data_uri;
+      $("#paymentAmountLabel").textContent = rupee(grand);
+      showScreenByAttr("payment");
+    });
+  });
+
+  $("#backFromPayment").addEventListener("click", function(){ showScreenByAttr("shell"); });
+  $("#cancelPaymentBtn").addEventListener("click", function(){ showScreenByAttr("shell"); });
+
+  $("#confirmPaymentBtn").addEventListener("click", function(){
+    showScreenByAttr("paying");
+    var entries = Object.values(state.cart);
+    var t = cartTotals();
+    var discount = state.coupon ? state.coupon.discount : 0;
+
+    setTimeout(function(){
+      var payload = {
+        vendor: state.currentVendor.key,
+        table: $("#tableInput").value.trim(),
+        customer_name: state.user.name,
+        customer_phone: state.user.phone,
+        remarks_note: $("#cartRemarks").value.trim(),
+        coupon_code: state.coupon ? state.coupon.code : null,
+        discount: discount,
+        items: entries.map(function(r){ return {item_code:r.item_code, qty:r.qty}; })
+      };
+      apiPost("ury.ury.api.campusbite.place_order", payload).then(function(res){
+        state.lastOrder = res;
+        $("#orderInvoiceNo").textContent = res.invoice;
+        $("#orderAmount").textContent = rupee(res.grand_total);
+        $("#orderTable").textContent = payload.table || "Not specified";
+        $("#successSub").textContent = "Order confirmed at " + res.vendor;
+        startOrderTracking(res.invoice);
+        showScreenByAttr("success");
+        state.cart = {};
+        state.coupon = null;
+        updateCartBadge();
+      }).catch(function(err){
+        showScreenByAttr("payment");
+        toast("Could not place order: " + (typeof err === "string" ? err : "please try again"));
+      });
+    }, 1200);
+  });
+
+  // ---------- REAL-TIME ORDER STATUS (Confirmed -> Preparing -> Served) ----------
+  var STAGES = ["Confirmed", "Preparing", "Served"];
+  var trackingTimer = null;
+
+  function paintStatusTrack(track, stage){
+    var idx = STAGES.indexOf(stage);
+    if(idx < 0) idx = 0;
+    $all(".st", track).forEach(function(s){
+      var sIdx = STAGES.indexOf(s.getAttribute("data-stage"));
+      s.classList.remove("done", "active");
+      if(sIdx < idx) s.classList.add("done");
+      else if(sIdx === idx) s.classList.add(idx === STAGES.length - 1 ? "done" : "active");
+    });
+  }
+
+  function startOrderTracking(invoice){
+    clearInterval(trackingTimer);
+    var track = $("#statusTrack");
+    paintStatusTrack(track, "Confirmed");
+
+    function poll(){
+      apiGet("ury.ury.api.campusbite.order_status", {invoice: invoice}).then(function(res){
+        paintStatusTrack(track, res.order_stage);
+        if(res.order_stage === "Served"){
+          clearInterval(trackingTimer);
+          $("#statusFootnote").innerHTML = "✅ Served — enjoy your meal! · 🪙 +1 CampusBite Coin earned";
+        }
+      }).catch(function(){ /* keep last known state on a transient error */ });
+    }
+    poll();
+    trackingTimer = setInterval(poll, 5000);
+  }
+
+  $("#orderMoreBtn").addEventListener("click", function(){
+    showScreenByAttr("shell");
+    switchTab("aggregator");
+  });
+  $("#viewLogBtn").addEventListener("click", function(){
+    showScreenByAttr("shell");
+    switchTab("orderlog");
+  });
+
+  // ---------- ORDER LOG + COINS ----------
+  var pendingFeedbackInvoice = null; // set from a ?feedback= deep link
+  var fbSelectedRating = {}; // invoice -> chosen star count, before submit
+
+  function stagePillHtml(stage){
+    var cls = (stage || "Confirmed").toLowerCase();
+    return '<span class="stage-pill ' + cls + '">' + (stage || "Confirmed") + '</span>';
+  }
+
+  function feedbackBoxHtml(o){
+    if(o.has_feedback){
+      return '<div class="fb-done">✓ Thanks for your feedback!</div>';
+    }
+    var stars = "";
+    for(var i=1;i<=5;i++){ stars += '<span class="fb-star" data-invoice="'+o.invoice+'" data-v="'+i+'">★</span>'; }
+    return (
+      '<div class="fb-box" data-invoice="'+o.invoice+'">' +
+        '<div style="font-size:12px;color:var(--sub);font-weight:700;margin-bottom:4px;">Rate this order</div>' +
+        '<div class="fb-stars">' + stars + '</div>' +
+        '<textarea placeholder="Any comments? (optional)"></textarea>' +
+        '<button class="fb-submit" data-invoice="'+o.invoice+'">Submit feedback</button>' +
+      '</div>'
+    );
+  }
+
+  function loadOrderLog(){
+    apiGet("ury.ury.api.campusbite.get_order_history", {phone: state.user.phone}).then(function(res){
+      $("#coinCount").textContent = res.coins;
+      $("#settingsCoins").textContent = res.coins;
+      var list = $("#orderLogList");
+      if(!res.orders.length){
+        list.innerHTML = '<div class="empty-cart">No orders yet.</div>';
+        return;
+      }
+      list.innerHTML = "";
+      res.orders.forEach(function(o){
+        var itemsLine = o.items.map(function(i){ return i.qty+"x "+i.item_name; }).join(", ");
+        var card = document.createElement("div");
+        card.className = "order-card";
+        card.setAttribute("data-invoice", o.invoice);
+        card.innerHTML =
+          '<div class="oc-top"><span class="oc-inv">'+o.invoice+' <span class="badge">'+o.vendor+'</span>'+stagePillHtml(o.order_stage)+'</span>' +
+          '<span class="oc-date">'+o.posting_date+'</span></div>' +
+          '<div class="oc-items">'+itemsLine+'</div>' +
+          '<div class="oc-total">'+rupee(o.grand_total)+'</div>' +
+          feedbackBoxHtml(o);
+        list.appendChild(card);
+      });
+
+      if(pendingFeedbackInvoice){
+        var target = list.querySelector('.order-card[data-invoice="'+pendingFeedbackInvoice+'"]');
+        if(target){
+          target.classList.add("fb-highlight");
+          target.scrollIntoView({behavior:"smooth", block:"center"});
+        }
+        pendingFeedbackInvoice = null;
+      }
+    });
+  }
+
+  // Delegated handling for star ratings + feedback submit inside Order Log.
+  $("#orderLogList").addEventListener("click", function(e){
+    var star = e.target.closest(".fb-star");
+    if(star){
+      var inv = star.getAttribute("data-invoice");
+      var v = parseInt(star.getAttribute("data-v"), 10);
+      fbSelectedRating[inv] = v;
+      $all(".fb-star[data-invoice=\""+inv+"\"]").forEach(function(s){
+        s.classList.toggle("on", parseInt(s.getAttribute("data-v"),10) <= v);
+      });
+      return;
+    }
+    var btn = e.target.closest(".fb-submit");
+    if(btn){
+      var invoice = btn.getAttribute("data-invoice");
+      var rating = fbSelectedRating[invoice];
+      if(!rating){ toast("Tap a star to rate your order first"); return; }
+      var box = btn.closest(".fb-box");
+      var comment = box.querySelector("textarea").value.trim();
+      btn.disabled = true;
+      btn.textContent = "Submitting…";
+      apiPost("ury.ury.api.campusbite.submit_feedback", {invoice: invoice, rating: rating, comment: comment || null})
+        .then(function(){
+          box.outerHTML = '<div class="fb-done">✓ Thanks for your feedback!</div>';
+          toast("Feedback submitted — thank you!");
+        }).catch(function(){
+          btn.disabled = false;
+          btn.textContent = "Submit feedback";
+          toast("Could not submit feedback, please try again");
+        });
+    }
+  });
+
+  // ---------- SETTINGS ----------
+  $("#logoutBtn").addEventListener("click", function(){
+    localStorage.removeItem("cb_user");
+    state.user = {name:"",phone:""};
+    state.currentVendor = null;
+    state.cart = {};
+    $("#loginName").value = ""; $("#loginPhone").value = "";
+    showScreenByAttr("login");
+  });
+
+  // ---------- BOOT ----------
+  parseQR();
+})();
+</script>
+</body>
+</html>

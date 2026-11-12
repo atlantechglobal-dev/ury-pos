@@ -1,0 +1,13 @@
+{
+ "db_name": "rpos_ag",
+ "db_password": "FfaScMBaC1zfswMm",
+ "db_type": "mariadb",
+ "domains": [
+  {
+   "domain": "iroas.atlantechglobal.com",
+   "ssl_certificate": "/etc/letsencrypt/live/rpos.atlantechglobal.com/fullchain.pem",
+   "ssl_certificate_key": "/etc/letsencrypt/live/rpos.atlantechglobal.com/privkey.pem"
+  }
+ ],
+ "server_script_enabled": 1
+}

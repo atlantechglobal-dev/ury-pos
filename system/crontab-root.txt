@@ -1,0 +1,2 @@
+
+@daily /usr/bin/certbot renew -a nginx --post-hook "systemctl reload nginx" # Renew lets-encrypt every month

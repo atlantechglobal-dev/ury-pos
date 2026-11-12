@@ -1,0 +1,11 @@
+Status: active
+
+To                         Action      From
+--                         ------      ----
+OpenSSH                    ALLOW       Anywhere                  
+80                         ALLOW       Anywhere                  
+443                        ALLOW       Anywhere                  
+OpenSSH (v6)               ALLOW       Anywhere (v6)             
+80 (v6)                    ALLOW       Anywhere (v6)             
+443 (v6)                   ALLOW       Anywhere (v6)             
+
